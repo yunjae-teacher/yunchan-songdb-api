@@ -1,0 +1,234 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Yunchan Song DB API",
+    "version": "1.0.0",
+    "description": "Suno 찬송가 프롬프트 관리를 위한 곡 데이터 API (윤찬 전용)"
+  },
+  "servers": [
+    {
+      "url": "https://yunchan-songdb-api-1.onrender.com",
+      "description": "Render production server"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "API 서버 헬스 체크",
+        "description": "서버가 정상 동작 중인지 확인합니다.",
+        "responses": {
+          "200": {
+            "description": "서버 정상",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  },
+                  "required": ["status"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/song_db/create": {
+      "post": {
+        "operationId": "createSong",
+        "summary": "새 곡을 Song DB에 추가",
+        "description": "스프레드시트에 곡 한 줄을 추가합니다.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "곡 제목"
+                  },
+                  "scripture": {
+                    "type": "string",
+                    "description": "성경 본문 (예: 요한복음 3:16)"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "description": "곡의 주제 / 메시지"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "언어 코드 (예: KO, EN 등)"
+                  },
+                  "mood": {
+                    "type": "string",
+                    "description": "분위기 (예: worship ballad, upbeat 등)"
+                  },
+                  "yt_title": {
+                    "type": "string",
+                    "description": "유튜브 업로드용 제목"
+                  }
+                },
+                "required": [
+                  "title",
+                  "scripture",
+                  "theme",
+                  "language",
+                  "mood",
+                  "yt_title"
+                ]
+              },
+              "examples": {
+                "sample": {
+                  "summary": "예시 곡 데이터",
+                  "value": {
+                    "title": "테스트 곡",
+                    "scripture": "요한복음 3:16",
+                    "theme": "하나님의 사랑",
+                    "language": "KO",
+                    "mood": "worship ballad",
+                    "yt_title": "테스트곡 - 하나님의 사랑"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "곡 추가 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "추가된 곡 제목"
+                    }
+                  },
+                  "required": ["ok", "title"]
+                },
+                "examples": {
+                  "success": {
+                    "summary": "성공 응답 예시",
+                    "value": {
+                      "ok": true,
+                      "title": "테스트 곡"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "요청 바디가 잘못된 경우"
+          },
+          "500": {
+            "description": "서버 내부 오류"
+          }
+        }
+      }
+    },
+    "/song_db/list": {
+      "get": {
+        "operationId": "listSongs",
+        "summary": "Song DB 목록 조회",
+        "description": "스프레드시트에 저장된 전체 곡 리스트를 조회합니다.",
+        "responses": {
+          "200": {
+            "description": "곡 리스트 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "songs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Song"
+                      }
+                    }
+                  },
+                  "required": ["songs"]
+                },
+                "examples": {
+                  "sample": {
+                    "summary": "곡 리스트 예시",
+                    "value": {
+                      "songs": [
+                        {
+                          "title": "테스트 곡",
+                          "scripture": "요한복음 3:16",
+                          "theme": "하나님의 사랑",
+                          "language": "KO",
+                          "mood": "worship ballad",
+                          "yt_title": "테스트곡 - 하나님의 사랑"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "서버 내부 오류"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Song": {
+        "type": "object",
+        "description": "Song DB에 저장되는 한 곡 정보",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "곡 제목"
+          },
+          "scripture": {
+            "type": "string",
+            "description": "성경 본문"
+          },
+          "theme": {
+            "type": "string",
+            "description": "곡의 주제"
+          },
+          "language": {
+            "type": "string",
+            "description": "언어 코드"
+          },
+          "mood": {
+            "type": "string",
+            "description": "분위기"
+          },
+          "yt_title": {
+            "type": "string",
+            "description": "유튜브 업로드 제목"
+          }
+        },
+        "required": [
+          "title",
+          "scripture",
+          "theme",
+          "language",
+          "mood",
+          "yt_title"
+        ]
+      }
+    }
+  }
+}
